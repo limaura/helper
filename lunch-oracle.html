@@ -28,7 +28,7 @@
 
     header {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 35px; /* 增加下方間距，避免籤枝重疊 */
     }
     h1 {
       color: var(--temple-red);
@@ -48,11 +48,12 @@
       align-items: center;
       margin-bottom: 25px;
       position: relative;
+      margin-top: 25px; /* 上方預留籤枝跳出空間 */
     }
 
     .bucket {
       width: 120px;
-      height: 180px;
+      height: 160px;
       background: linear-gradient(135deg, #8d6e63, var(--wood-dark));
       border: 4px solid var(--temple-gold);
       border-radius: 10px 10px 30px 30px;
@@ -65,12 +66,13 @@
       cursor: pointer;
     }
 
-    /* 籤枝 */
+    /* 籤枝群組 */
     .sticks {
       display: flex;
       gap: 6px;
       position: absolute;
-      top: -30px;
+      top: -25px;
+      transition: transform 0.3s;
     }
     .stick {
       width: 10px;
@@ -79,18 +81,75 @@
       border-radius: 5px 5px 0 0;
       border: 1px solid #a1887f;
       border-top: 12px solid var(--temple-red);
+      transition: transform 0.3s ease;
     }
 
-    /* 搖晃動畫 */
-    .shake {
-      animation: shakeBucket 0.5s ease-in-out infinite;
+    /* 單獨跳出的籤 */
+    .lucky-stick {
+      position: absolute;
+      width: 12px;
+      height: 105px;
+      background-color: #fff8e1;
+      border-radius: 6px 6px 0 0;
+      border: 1px solid var(--temple-gold);
+      border-top: 15px solid var(--temple-red);
+      top: -20px;
+      opacity: 0;
+      z-index: 10;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
+    .lucky-stick::after {
+      content: "籤";
+      font-size: 9px;
+      color: var(--temple-gold);
+      font-weight: bold;
+      position: absolute;
+      top: 1px;
+    }
+
+    /* 搖晃與求籤動畫 */
+    .shake {
+      animation: shakeBucket 0.6s ease-in-out infinite;
+    }
+    .shake .stick:nth-child(1) { animation: stickJiggle1 0.3s infinite alternate; }
+    .shake .stick:nth-child(2) { animation: stickJiggle2 0.3s infinite alternate 0.1s; }
+    .shake .stick:nth-child(3) { animation: stickJiggle3 0.3s infinite alternate 0.05s; }
+    .shake .stick:nth-child(4) { animation: stickJiggle1 0.3s infinite alternate 0.15s; }
+
     @keyframes shakeBucket {
-      0% { transform: rotate(0deg); }
-      25% { transform: rotate(-8deg); }
-      50% { transform: rotate(8deg); }
-      75% { transform: rotate(-5deg); }
-      100% { transform: rotate(0deg); }
+      0% { transform: rotate(0deg) translateY(0); }
+      20% { transform: rotate(-9deg) translateY(-3px); }
+      40% { transform: rotate(8deg) translateY(2px); }
+      60% { transform: rotate(-7deg) translateY(-2px); }
+      80% { transform: rotate(6deg) translateY(1px); }
+      100% { transform: rotate(0deg) translateY(0); }
+    }
+
+    @keyframes stickJiggle1 {
+      0% { transform: translateY(-5px) rotate(-3deg); }
+      100% { transform: translateY(-15px) rotate(-6deg); }
+    }
+    @keyframes stickJiggle2 {
+      0% { transform: translateY(-12px); }
+      100% { transform: translateY(-22px) rotate(3deg); }
+    }
+    @keyframes stickJiggle3 {
+      0% { transform: translateY(-2px) rotate(4deg); }
+      100% { transform: translateY(-12px) rotate(8deg); }
+    }
+
+    /* 籤跳出來的動畫 */
+    .stick-pop-out {
+      animation: popOut 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+    @keyframes popOut {
+      0% { opacity: 0; transform: translateY(20px) scale(0.8); }
+      50% { opacity: 1; transform: translateY(-60px) scale(1.1) rotate(-5deg); }
+      75% { transform: translateY(-45px) scale(1) rotate(0deg); }
+      100% { opacity: 1; transform: translateY(-50px) scale(1) rotate(0deg); }
     }
 
     .btn-draw {
@@ -124,7 +183,7 @@
     }
 
     .result-card.active { display: block; animation: fadeIn 0.4s ease-out; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
     .fortune-tag {
       display: inline-block;
@@ -303,8 +362,10 @@
         <div class="stick" style="transform: translateY(-2px) rotate(4deg);"></div>
         <div class="stick" style="transform: translateY(-8px) rotate(-2deg);"></div>
       </div>
+      <!-- 抽出時跳出的單隻靈籤 -->
+      <div class="lucky-stick" id="luckyStick"></div>
     </div>
-    <button class="btn-draw" onclick="drawFortune()">誠心求籤</button>
+    <button class="btn-draw" id="drawBtn" onclick="drawFortune()">誠心求籤</button>
   </main>
 
   <!-- 籤詩顯示區域 -->
@@ -378,6 +439,7 @@
     ];
 
     const signs = ["大吉", "上吉", "中吉", "聖籤"];
+    let isDrawing = false;
 
     // 取得店家列表
     function getShops() {
@@ -423,38 +485,58 @@
       }).join('');
     }
 
-    // 抽籤邏輯
+    // 抽籤邏輯與完整動畫
     function drawFortune() {
+      if (isDrawing) return;
+
       const list = getShops();
       if (list.length === 0) {
         alert("籤筒目前沒有店家，請點選「新增店家」或「編輯完整清單」加入店家！");
         return;
       }
 
+      isDrawing = true;
       const bucket = document.getElementById("bucket");
       const card = document.getElementById("resultCard");
-      
+      const luckyStick = document.getElementById("luckyStick");
+      const drawBtn = document.getElementById("drawBtn");
+
+      // 1. 重置狀態
       card.classList.remove("active");
+      luckyStick.classList.remove("stick-pop-out");
+      luckyStick.style.opacity = "0";
+      drawBtn.innerText = "求籤中...";
+      drawBtn.disabled = true;
+
+      // 2. 開始搖晃籤筒
       bucket.classList.add("shake");
 
+      // 3. 搖晃 1 秒後，籤隻向上跳出
       setTimeout(() => {
         bucket.classList.remove("shake");
-        
-        const randomShop = list[Math.floor(Math.random() * list.length)];
-        const randomSign = signs[Math.floor(Math.random() * signs.length)];
-        const randomPoem = randomShop.poem || poems[Math.floor(Math.random() * poems.length)];
+        luckyStick.classList.add("stick-pop-out");
 
-        document.getElementById("fortuneSign").innerText = `籤詩：${randomSign}`;
-        document.getElementById("shopName").innerText = randomShop.name;
-        document.getElementById("shopInfo").innerText = `【${randomShop.category}】 🚶 步行約 ${randomShop.walkMin || 5} 分鐘`;
-        document.getElementById("fortunePoem").innerText = `「${randomPoem}」`;
-        
-        // 優先使用店家設定的 Google 地圖網址，若無則以名稱搜尋
-        const mapSearchUrl = randomShop.mapUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(randomShop.name + " 台北市內湖區洲子街")}`;
-        document.getElementById("mapLink").href = mapSearchUrl;
+        // 4. 籤跳出 0.6 秒後，顯示結果卡片
+        setTimeout(() => {
+          const randomShop = list[Math.floor(Math.random() * list.length)];
+          const randomSign = signs[Math.floor(Math.random() * signs.length)];
+          const randomPoem = randomShop.poem || poems[Math.floor(Math.random() * poems.length)];
 
-        card.classList.add("active");
-      }, 600);
+          document.getElementById("fortuneSign").innerText = `籤詩：${randomSign}`;
+          document.getElementById("shopName").innerText = randomShop.name;
+          document.getElementById("shopInfo").innerText = `【${randomShop.category}】 🚶 步行約 ${randomShop.walkMin || 5} 分鐘`;
+          document.getElementById("fortunePoem").innerText = `「${randomPoem}」`;
+          
+          const mapSearchUrl = randomShop.mapUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(randomShop.name + " 台北市內湖區洲子街")}`;
+          document.getElementById("mapLink").href = mapSearchUrl;
+
+          card.classList.add("active");
+          drawBtn.innerText = "再次求籤";
+          drawBtn.disabled = false;
+          isDrawing = false;
+        }, 600);
+
+      }, 1000);
     }
 
     // 新增店家
