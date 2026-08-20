@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>洲子街午餐籤 · 今天吃什麼</title>
+<meta name="description" content="內湖洲子街辦公室午餐決定工具：走路10分鐘內、160元以內，抽一支籤決定今天吃什麼。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700;900&family=Noto+Sans+TC:wght@400;500;700&family=Teko:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #EFE6D2;
+    --paper-deep: #E4D8BC;
+    --ink: #241C15;
+    --ink-soft: #4a4038;
+    --vermillion: #B7301F;
+    --vermillion-deep: #8C2417;
+    --gold: #B8923E;
+    --jade: #3F6B5B;
+    --jade-deep: #2C4C40;
+    --line: rgba(36,28,21,0.18);
+    --card-bg: #FBF6E9;
+    --shadow: 0 8px 24px rgba(36,28,21,0.14);
+    --radius: 4px;
+  }
+
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 500px at 15% -10%, rgba(183,48,31,0.06), transparent 60%),
+      radial-gradient(900px 500px at 110% 10%, rgba(63,107,91,0.07), transparent 55%),
+      var(--paper);
+    color: var(--ink);
+    font-family: "Noto Sans TC", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+
+  /* subtle paper texture */
+  body::before{
+    content:"";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(36,28,21,0.02) 0px, transparent 1px, transparent 3px),
+      repeating-linear-gradient(90deg, rgba(36,28,21,0.015) 0px, transparent 1px, transparent 3px);
+    z-index: 0;
+  }
+
+  .wrap{ max-width: 980px; margin: 0 auto; padding: 0 20px 80px; position:relative; z-index:1; }
+
+  /* ---------- header / signboard ---------- */
+  header.board{
+    padding: 44px 0 28px;
+    text-align:center;
+    border-bottom: 3px double var(--ink);
+    margin-bottom: 34px;
+  }
+  .eyebrow{
+    font-family:"Teko", sans-serif;
+    letter-spacing: 0.32em;
+    font-size: 14px;
+    color: var(--vermillion-deep);
+    text-transform: uppercase;
+    font-weight:600;
+  }
+  h1{
+    font-family: "Noto Serif TC", serif;
+    font-weight: 900;
+    font-size: clamp(32px, 6vw, 52px);
+    margin: 10px 0 12px;
+    letter-spacing: 0.04em;
+    color: var(--ink);
+  }
+  h1 .accent{ color: var(--vermillion); }
+  .subhead{
+    font-size: 15px;
+    color: var(--ink-soft);
+    max-width: 520px;
+    margin: 0 auto;
+    line-height: 1.7;
+  }
+  .meta-row{
+    display:flex;
+    justify-content:center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+  }
+  .meta-pill{
+    font-size: 12.5px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 5px 14px;
+    color: var(--ink-soft);
+    background: rgba(251,246,233,0.6);
+  }
+
+  /* ---------- draw section (hero / signature) ---------- */
+  .draw-section{
+    display:flex;
+    flex-direction: column;
+    align-items:center;
+    padding: 20px 0 46px;
+  }
+
+  .canister{
+    width: 92px;
+    height: 116px;
+    margin-bottom: 6px;
+    cursor:pointer;
+    transform-origin: 50% 90%;
+  }
+  .canister.shaking{ animation: shake 0.5s ease-in-out infinite; }
+  @keyframes shake{
+    0%,100%{ transform: rotate(0deg); }
+    20%{ transform: rotate(-6deg); }
+    40%{ transform: rotate(5deg); }
+    60%{ transform: rotate(-4deg); }
+    80%{ transform: rotate(3deg); }
+  }
+
+  .draw-btn{
+    font-family: "Noto Serif TC", serif;
+    font-weight: 700;
+    font-size: 19px;
+    letter-spacing: 0.16em;
+    color: var(--paper);
+    background: linear-gradient(180deg, var(--vermillion) 0%, var(--vermillion-deep) 100%);
+    border: none;
+    padding: 15px 38px;
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: 0 10px 22px rgba(140,36,23,0.35);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .draw-btn:hover{ transform: translateY(-2px); box-shadow: 0 14px 26px rgba(140,36,23,0.4); }
+  .draw-btn:active{ transform: translateY(0px) scale(0.98); }
+  .draw-btn:disabled{ opacity:0.55; cursor:default; transform:none; }
+  .draw-hint{
+    margin-top: 12px;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+  }
+  .draw-hint b{ color: var(--vermillion-deep); }
+
+  /* ---------- fortune slip result ---------- */
+  .slip-stage{
+    width: 100%;
+    max-width: 460px;
+    margin-top: 30px;
+    min-height: 10px;
+  }
+  .slip{
+    position: relative;
+    background: var(--card-bg);
+    border: 1.5px solid var(--vermillion);
+    border-radius: 2px;
+    padding: 30px 26px 26px;
+    box-shadow: var(--shadow);
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+    transition: opacity 0.45s ease, transform 0.45s ease;
+  }
+  .slip::before, .slip::after{
+    content:"";
+    position:absolute;
+    left:0; right:0;
+    height: 8px;
+    background: repeating-linear-gradient(90deg, var(--paper) 0 6px, transparent 6px 12px);
+  }
+  .slip::before{ top:-5px; }
+  .slip::after{ bottom:-5px; }
+  .slip.show{ opacity:1; transform: translateY(0) scale(1); }
+
+  .slip-stamp{
+    position:absolute;
+    top: 18px;
+    right: 20px;
+    width: 58px; height: 58px;
+    border: 2.5px solid var(--vermillion);
+    border-radius: 50%;
+    color: var(--vermillion);
+    font-family: "Noto Serif TC", serif;
+    font-weight: 900;
+    font-size: 13px;
+    display:flex; align-items:center; justify-content:center;
+    text-align:center;
+    line-height: 1.3;
+    transform: rotate(10deg);
+    opacity: 0.85;
+  }
+  .slip-eyebrow{
+    font-size: 12px;
+    letter-spacing: 0.3em;
+    color: var(--vermillion-deep);
+    font-weight: 700;
+  }
+  .slip-name{
+    font-family: "Noto Serif TC", serif;
+    font-weight: 900;
+    font-size: 27px;
+    margin: 6px 0 4px;
+    padding-right: 60px;
+    color: var(--ink);
+  }
+  .slip-cat{
+    font-size: 13px;
+    color: var(--jade-deep);
+    font-weight: 700;
+    margin-bottom: 14px;
+  }
+  .slip-stats{
+    display:flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .stat{
+    font-family: "Teko", sans-serif;
+    font-weight: 600;
+    background: rgba(63,107,91,0.09);
+    border: 1px solid rgba(63,107,91,0.25);
+    color: var(--jade-deep);
+    border-radius: var(--radius);
+    padding: 6px 12px 4px;
+    font-size: 15px;
+    letter-spacing: 0.02em;
+  }
+  .stat.warn{
+    background: rgba(183,48,31,0.08);
+    border-color: rgba(183,48,31,0.28);
+    color: var(--vermillion-deep);
+  }
+  .slip-note{
+    font-size: 14px;
+    line-height: 1.85;
+    color: var(--ink-soft);
+    border-top: 1px dashed var(--line);
+    padding-top: 14px;
+    margin-bottom: 16px;
+  }
+  .slip-foot{
+    display:flex;
+    justify-content: space-between;
+    align-items:center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .slip-hours{
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+  .map-link{
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--vermillion-deep);
+    text-decoration: none;
+    border-bottom: 1.5px solid var(--vermillion-deep);
+    padding-bottom: 1px;
+    white-space: nowrap;
+  }
+  .map-link:hover{ color: var(--vermillion); border-color: var(--vermillion); }
+
+  .empty-slip{
+    text-align:center;
+    padding: 26px 20px;
+    border: 1.5px dashed var(--line);
+    border-radius: var(--radius);
+    color: var(--ink-soft);
+    font-size: 14px;
+    background: rgba(251,246,233,0.5);
+  }
+
+  /* ---------- filters ---------- */
+  .filters{
+    background: rgba(251,246,233,0.55);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 20px 22px 22px;
+    margin-bottom: 30px;
+  }
+  .filters h2{
+    font-family: "Noto Serif TC", serif;
+    font-size: 15px;
+    letter-spacing: 0.14em;
+    margin: 0 0 16px;
+    color: var(--ink);
+    display:flex;
+    align-items:center;
+    gap: 8px;
+  }
+  .filters h2::before{
+    content:"";
+    width: 14px; height: 1.5px;
+    background: var(--vermillion);
+    display:inline-block;
+  }
+  .filter-row{
+    display:flex;
+    flex-wrap: wrap;
+    gap: 22px 30px;
+    margin-bottom: 4px;
+  }
+  .filter-group{ flex: 1 1 220px; }
+  .filter-group .label{
+    font-size: 12px;
+    color: var(--ink-soft);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    margin-bottom: 8px;
+    display:block;
+  }
+  .chip-set{ display:flex; flex-wrap:wrap; gap: 8px; }
+  .chip{
+    font-size: 13px;
+    padding: 6px 13px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--card-bg);
+    cursor:pointer;
+    color: var(--ink-soft);
+    user-select:none;
+    transition: all 0.12s ease;
+  }
+  .chip:hover{ border-color: var(--jade); }
+  .chip.active{
+    background: var(--jade);
+    border-color: var(--jade);
+    color: #fff;
+  }
+  .range-line{ display:flex; align-items:center; gap: 12px; }
+  input[type="range"]{
+    flex:1;
+    accent-color: var(--vermillion);
+  }
+  .range-val{
+    font-family: "Teko", sans-serif;
+    font-weight: 600;
+    font-size: 18px;
+    color: var(--vermillion-deep);
+    min-width: 64px;
+    text-align:right;
+  }
+  select#budgetSelect{
+    width:100%;
+    font-family: "Noto Sans TC", sans-serif;
+    font-size: 13.5px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--line);
+    background: var(--card-bg);
+    color: var(--ink);
+  }
+  .filter-count{
+    margin-top: 14px;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+  }
+  .filter-count b{ color: var(--jade-deep); }
+  .reset-link{
+    background:none;
+    border:none;
+    font-size: 12.5px;
+    color: var(--vermillion-deep);
+    text-decoration: underline;
+    cursor:pointer;
+    padding: 0;
+    margin-left: 10px;
+  }
+
+  /* ---------- list ---------- */
+  .list-head{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    margin-bottom: 16px;
+  }
+  .list-head h2{
+    font-family: "Noto Serif TC", serif;
+    font-size: 18px;
+    margin:0;
+  }
+  .sort-hint{ font-size: 12px; color: var(--ink-soft); }
+
+  .grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 14px;
+  }
+  .card{
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 16px 17px 15px;
+    display:flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  .card:hover{ transform: translateY(-2px); box-shadow: 0 10px 18px rgba(36,28,21,0.08); }
+  .card-top{ display:flex; justify-content:space-between; gap:8px; align-items:flex-start; }
+  .card-name{
+    font-family: "Noto Serif TC", serif;
+    font-weight: 700;
+    font-size: 16.5px;
+    line-height: 1.35;
+  }
+  .card-rating{
+    font-family:"Teko", sans-serif;
+    font-weight:600;
+    font-size: 15px;
+    color: var(--gold);
+    white-space:nowrap;
+  }
+  .card-cat{ font-size: 12px; color: var(--jade-deep); font-weight:700; }
+  .card-badges{ display:flex; flex-wrap:wrap; gap:6px; margin: 2px 0 2px; }
+  .badge{
+    font-size: 11.5px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: rgba(36,28,21,0.06);
+    color: var(--ink-soft);
+  }
+  .badge.fit{ background: rgba(63,107,91,0.12); color: var(--jade-deep); }
+  .badge.over{ background: rgba(183,48,31,0.1); color: var(--vermillion-deep); }
+  .card-note{ font-size: 13px; color: var(--ink-soft); line-height: 1.6; flex:1; }
+  .card-bottom{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top: 4px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--line);
+  }
+  .card-hours{ font-size: 11px; color: var(--ink-soft); }
+  .card-map{
+    font-size: 12.5px;
+    font-weight:700;
+    color: var(--vermillion-deep);
+    text-decoration:none;
+  }
+  .card-map:hover{ text-decoration: underline; }
+  .badge.custom{ background: rgba(184,146,62,0.16); color: #8a6a1f; }
+  .card-delete{
+    background:none;
+    border:none;
+    color: var(--ink-soft);
+    font-size: 12px;
+    cursor:pointer;
+    padding: 0;
+    text-decoration: underline;
+  }
+  .card-delete:hover{ color: var(--vermillion-deep); }
+
+  /* ---------- add-spot form ---------- */
+  .add-toggle{
+    font-family: "Noto Sans TC", sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--jade-deep);
+    background: rgba(63,107,91,0.1);
+    border: 1px solid rgba(63,107,91,0.3);
+    border-radius: 999px;
+    padding: 7px 16px;
+    cursor:pointer;
+    transition: background 0.12s ease;
+  }
+  .add-toggle:hover{ background: rgba(63,107,91,0.18); }
+
+  .add-panel{
+    background: rgba(251,246,233,0.6);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 20px 22px;
+    margin-bottom: 22px;
+    display: none;
+  }
+  .add-panel.open{ display: block; }
+  .add-panel h3{
+    font-family: "Noto Serif TC", serif;
+    font-size: 15px;
+    margin: 0 0 14px;
+  }
+  .add-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px 16px;
+    margin-bottom: 6px;
+  }
+  .add-field{ display:flex; flex-direction:column; gap:6px; }
+  .add-field.wide{ grid-column: 1 / -1; }
+  .add-field label{
+    font-size: 11.5px;
+    font-weight:700;
+    color: var(--ink-soft);
+    letter-spacing: 0.04em;
+  }
+  .add-field input, .add-field textarea{
+    font-family: "Noto Sans TC", sans-serif;
+    font-size: 13.5px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--line);
+    background: var(--card-bg);
+    color: var(--ink);
+    resize: vertical;
+  }
+  .add-field input:focus, .add-field textarea:focus{
+    outline: 2px solid var(--jade);
+    outline-offset: 1px;
+  }
+  .add-actions{
+    display:flex;
+    align-items:center;
+    gap: 14px;
+    margin-top: 14px;
+  }
+  .add-submit{
+    font-family: "Noto Serif TC", serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.06em;
+    color: #fff;
+    background: var(--jade);
+    border: none;
+    padding: 10px 24px;
+    border-radius: 999px;
+    cursor:pointer;
+  }
+  .add-submit:hover{ background: var(--jade-deep); }
+  .add-cancel{
+    background:none;
+    border:none;
+    font-size: 13px;
+    color: var(--ink-soft);
+    text-decoration: underline;
+    cursor:pointer;
+  }
+  .add-error{
+    font-size: 12.5px;
+    color: var(--vermillion-deep);
+    margin-top: 8px;
+    display:none;
+  }
+  .add-error.show{ display:block; }
+  .add-note{
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    margin-top: 10px;
+    line-height: 1.6;
+  }
+
+  .no-result{
+    text-align:center;
+    padding: 40px 20px;
+    color: var(--ink-soft);
+    font-size: 14px;
+    border: 1px dashed var(--line);
+    border-radius: 6px;
+  }
+
+  footer{
+    text-align:center;
+    margin-top: 50px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    font-size: 12px;
+    color: var(--ink-soft);
+    line-height: 1.8;
+  }
+
+  @media (max-width: 560px){
+    header.board{ padding-top: 32px; }
+    .filters{ padding: 16px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="board">
+    <div class="eyebrow">洲子街105號 · 步行10分鐘覓食圈</div>
+    <h1>今日<span class="accent">午餐籤</span></h1>
+    <p class="subhead">辦公室旁挑不出午餐？抽一支籤，讓它幫你決定。所有店家都在走路10分鐘的範圍內，價位以160元為基準標示。</p>
+    <div class="meta-row">
+      <span class="meta-pill">📍 內湖區洲子街105號</span>
+      <span class="meta-pill">🚶 步行 ≤10 分鐘</span>
+      <span class="meta-pill">💰 抓 160 元上下</span>
+    </div>
+  </header>
+
+  <section class="draw-section">
+    <svg class="canister" id="canisterSvg" viewBox="0 0 92 116" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <ellipse cx="46" cy="108" rx="30" ry="6" fill="var(--ink)" opacity="0.08"/>
+      <rect x="14" y="30" width="64" height="76" rx="6" fill="var(--vermillion)"/>
+      <rect x="14" y="30" width="64" height="76" rx="6" fill="none" stroke="var(--vermillion-deep)" stroke-width="2"/>
+      <rect x="20" y="40" width="52" height="58" rx="2" fill="none" stroke="var(--gold)" stroke-width="1" opacity="0.55"/>
+      <text x="46" y="76" text-anchor="middle" font-family="Noto Serif TC, serif" font-weight="900" font-size="20" fill="var(--gold)">籤</text>
+      <g id="sticksGroup">
+        <rect x="38" y="6" width="4" height="34" rx="2" fill="#F4EBD0" stroke="var(--ink)" stroke-width="1"/>
+        <rect x="46" y="2" width="4" height="38" rx="2" fill="#F4EBD0" stroke="var(--ink)" stroke-width="1"/>
+        <rect x="52" y="8" width="4" height="32" rx="2" fill="#F4EBD0" stroke="var(--ink)" stroke-width="1"/>
+      </g>
+    </svg>
+    <button class="draw-btn" id="drawBtn" type="button">抽 籤 決 定 午 餐</button>
+    <div class="draw-hint" id="drawHint">目前符合條件的店家：<b id="hintCount">–</b> 間</div>
+
+    <div class="slip-stage" id="slipStage"></div>
+  </section>
+
+  <section class="filters" aria-label="篩選條件">
+    <h2>調整籤筒範圍</h2>
+    <div class="filter-row">
+      <div class="filter-group">
+        <span class="label">餐點類型</span>
+        <div class="chip-set" id="categoryChips"></div>
+      </div>
+      <div class="filter-group">
+        <span class="label">步行時間（最長 <span id="walkValLabel">10</span> 分鐘）</span>
+        <div class="range-line">
+          <input type="range" id="walkRange" min="1" max="10" value="10" step="1">
+          <span class="range-val" id="walkValNum">10 分</span>
+        </div>
+      </div>
+      <div class="filter-group">
+        <span class="label">預算篩選</span>
+        <select id="budgetSelect">
+          <option value="all">不限（顯示所有店家）</option>
+          <option value="fit" selected>完全在 160 元內</option>
+          <option value="loose">160 元上下都算（含邊緣）</option>
+        </select>
+      </div>
+    </div>
+    <div class="filter-count">符合條件：<b id="matchCount">0</b> 間<button class="reset-link" id="resetBtn" type="button">重設篩選</button></div>
+  </section>
+
+  <section aria-label="店家清單">
+    <div class="list-head">
+      <h2>完整清單</h2>
+      <div style="display:flex; align-items:center; gap:14px;">
+        <span class="sort-hint">依步行距離由近到遠排序</span>
+        <button class="add-toggle" id="addToggleBtn" type="button">＋ 新增店家</button>
+      </div>
+    </div>
+
+    <div class="add-panel" id="addPanel">
+      <h3>新增一間店家</h3>
+      <form id="addForm">
+        <div class="add-grid">
+          <div class="add-field wide">
+            <label for="f-name">店名 *</label>
+            <input id="f-name" type="text" required placeholder="例：新開的滷味攤">
+          </div>
+          <div class="add-field">
+            <label for="f-category">類型 *</label>
+            <input id="f-category" type="text" required list="categoryOptions" placeholder="便當／小吃／咖啡輕食…">
+            <datalist id="categoryOptions"></datalist>
+          </div>
+          <div class="add-field">
+            <label for="f-walk">走路時間（分鐘）*</label>
+            <input id="f-walk" type="number" min="1" max="30" required placeholder="例：5">
+          </div>
+          <div class="add-field">
+            <label for="f-priceMin">價格下限（元）*</label>
+            <input id="f-priceMin" type="number" min="0" required placeholder="例：100">
+          </div>
+          <div class="add-field">
+            <label for="f-priceMax">價格上限（元）*</label>
+            <input id="f-priceMax" type="number" min="0" required placeholder="例：150">
+          </div>
+          <div class="add-field">
+            <label for="f-rating">評分（0–5，可留空）</label>
+            <input id="f-rating" type="number" min="0" max="5" step="0.1" placeholder="例：4.5">
+          </div>
+          <div class="add-field">
+            <label for="f-tags">標籤（逗號分隔，可留空）</label>
+            <input id="f-tags" type="text" placeholder="例：麵食, 平日限定">
+          </div>
+          <div class="add-field wide">
+            <label for="f-hours">營業時間（可留空）</label>
+            <input id="f-hours" type="text" placeholder="例：週一至週五 11:00–14:00">
+          </div>
+          <div class="add-field wide">
+            <label for="f-note">備註（可留空）</label>
+            <textarea id="f-note" rows="2" placeholder="推薦菜色、注意事項…"></textarea>
+          </div>
+          <div class="add-field wide">
+            <label for="f-map">Google 地圖連結或地址（可留空，留空會用店名建立搜尋連結）</label>
+            <input id="f-map" type="text" placeholder="貼上地圖連結，或輸入地址">
+          </div>
+        </div>
+        <div class="add-error" id="addError"></div>
+        <div class="add-actions">
+          <button class="add-submit" type="submit">新增店家</button>
+          <button class="add-cancel" type="button" id="addCancelBtn">取消</button>
+        </div>
+        <div class="add-note">新增的店家只會存在你這個瀏覽器裡（localStorage），換裝置或清除瀏覽器資料就會不見。清單和抽籤都會一起計入自訂店家，卡片上會標示「自訂」，可以隨時刪除。</div>
+      </form>
+    </div>
+
+    <div class="grid" id="cardGrid"></div>
+  </section>
+
+  <footer>
+    價格為依評論與店家等級推估的參考區間，實際菜色與售價請以店家現場為準。<br>
+    資料整理日期：2026 年 8 月。步行時間以每分鐘約 75 公尺估算，僅供參考。
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  const SPOTS = [
+    {
+      name: "沐暮食光", category: "便當",
+      tags: ["家常菜","平日限定"],
+      priceMin: 100, priceMax: 130, walk: 1, rating: 4.6,
+      note: "家常炒物便當，配菜清爽、滷牛蒡和溫泉蛋評價不錯。只有平日中午營業，去晚了容易賣完。",
+      hours: "週一至週五 11:30–14:00（六日公休）",
+      mapsUrl: "https://www.google.com/maps/place/?q=place_id:ChIJibK8j6itQjQRBUWsi7MDeT8"
+    },
+    {
+      name: "康民經濟便當", category: "便當",
+      tags: ["銅板價","主餐多選"],
+      priceMin: 90, priceMax: 140, walk: 3, rating: 4.1,
+      note: "內湖出了名的銅板便當，主餐選擇多、附三樣配菜，適合單純想省荷包的日子。",
+      hours: "週一至週六 11:30–19:30（週日公休）",
+      mapsUrl: "https://www.google.com/maps/place/?q=place_id:ChIJe6UTUEStQjQRW-YLzIJmvMA"
+    },
+    {
+      name: "洲子美食街", category: "美食街",
+      tags: ["多攤位","含速食"],
+      priceMin: 80, priceMax: 160, walk: 2, rating: 3.6,
+      note: "多攤位美食街，涵蓋速食、麵飯、飲料，選擇彈性大，缺點是中午人潮多、排隊較久。",
+      hours: "每日 07:00–21:00",
+      mapsUrl: "https://www.google.com/maps/place/?q=place_id:ChIJhTzhxm-sQjQRPc_xAdkk3_k"
+    },
+    {
+      name: "聯邦自由廣場美食街", category: "美食街",
+      tags: ["多攤位","內用多"],
+      priceMin: 90, priceMax: 150, walk: 4, rating: 3.7,
+      note: "巷弄內的平價美食街，滷排骨飯評價不錯，內用座位多，但假日公休。",
+      hours: "週一至週五 06:30–20:00（六日公休）",
+      mapsUrl: "https://www.google.com/maps/place/?q=place_id:ChIJuynrrYCsQjQRadCEOGkBrmg"
+    },
+    {
+      name: "阿娥傳統小吃", category: "小吃",
+      tags: ["麵食","肉粽"],
+      priceMin: 70, priceMax: 120, walk: 2, rating: 3.7,
+      note: "傳統麵店，肉粽、麻醬麵評價佳，價位親民，適合想吃清爽一點的日子。",
+      hours: "每日 11:40–19:15",
+      mapsUrl: "https://www.google.com/maps/place/?q=place_id:ChIJM3vmp-GtQjQRdQ8hdYg1Va8"
+    },
+    {
+      name: "廣東鴨莊（燒臘便當）", category: "便當",
+      tags: ["燒臘","叉燒油雞"],
+      priceMin: 100, priceMax: 140, walk: 2, rating: 3.9,
+      note: "燒臘便當專賣，叉燒、油雞類主餐選擇多，價格中等，假日不營業。",
+      hours: "週一至週五 11:00–20:00（六日公休）",
+      mapsUrl: "https://www.google.com/maps/place/?q=place_id:ChIJoZg6z2-sQjQRd4ngCj8e8lM"
+    },
+    {
+      name: "LE BANHMI 樂粄米 內科店", category: "異國輕食",
+      tags: ["越式法國麵包"],
+      priceMin: 110, priceMax: 170, walk: 2, rating: 4.2,
+      note: "內科型越式法國麵包，麵包酥脆、醬料清爽，套餐價位接近預算上限，建議選單點三明治。",
+      hours: "週一至週五 09:00–19:30，六日 11:00–15:30",
+      mapsUrl: "https://www.google.com/maps/place/?q=place_id:ChIJGRLnFY6tQjQReO0uZCGCXdc"
+    },
+    {
+      name: "穀豐新福隆古早味便當", category: "便當",
+      tags: ["老字號","雞腿"],
+      priceMin: 100, priceMax: 150, walk: 6, rating: 4.4,
+      note: "老字號火車頭造型便當店，招牌雞腿酥脆多汁，中午常大排長龍。",
+      hours: "週一至週五 10:30–14:00、17:00–19:30（六日公休）",
+      mapsUrl: "https://www.google.com/maps/place/?q=place_id:ChIJjfpewm6sQjQRKU8Z6Ze5GYs"
+    },
+    {
+      name: "御吉YUJI 日式便當專賣", category: "便當",
+      tags: ["日式","少油少鹽"],
+      priceMin: 150, priceMax: 220, walk: 4, rating: 4.3,
+      note: "日式健康便當，主打少油少鹽，價位比一般便當略高，點餐時留意加購項目避免超出預算。",
+      hours: "週一至週五 11:00–13:30、17:00–19:30（六日公休）",
+      mapsUrl: "https://www.google.com/maps/place/?q=place_id:ChIJB28-SdOtQjQRThNp9TOvMBQ"
+    },
+    {
+      name: "賀甲小館", category: "台式家常",
+      tags: ["自選四菜","附熱湯"],
+      priceMin: 100, priceMax: 160, walk: 6, rating: 4.6,
+      note: "自選四樣配菜的台式小館，每日菜色不同，附熱湯與飲料無限暢飲，評價很高。",
+      hours: "週一至週六 11:00–20:00（週日公休）",
+      mapsUrl: "https://www.google.com/maps/place/?q=place_id:ChIJzWjUJXCtQjQRpwqoZQmZZG0"
+    },
+    {
+      name: "烤食煮盒便當 內湖店", category: "便當",
+      tags: ["烤雞","滷味"],
+      priceMin: 100, priceMax: 160, walk: 8, rating: 4.9,
+      note: "烤雞、滷味類便當，評價極高，招牌烤雞是熟客推薦首選。",
+      hours: "每日 10:00–19:00",
+      mapsUrl: "https://www.google.com/maps/place/?q=place_id:ChIJq9bOldqtQjQRw0P6iwr9JPA"
+    },
+    {
+      name: "豐禾便當", category: "便當",
+      tags: ["雞腿","份量大"],
+      priceMin: 110, priceMax: 160, walk: 10, rating: 4.2,
+      note: "巷口便當店，雞腿便當份量大、滷味入味，中午時段常客滿。",
+      hours: "週一至週五 11:00–14:30、16:00–19:30，週六 11:00–13:30（週日公休）",
+      mapsUrl: "https://www.google.com/maps/place/?q=place_id:ChIJUakkzgutQjQR_DZMWyyRkP0"
+    },
+    {
+      name: "享之鮭東石鮮蚵", category: "小吃",
+      tags: ["海鮮","蚵仔麵線"],
+      priceMin: 100, priceMax: 180, walk: 8, rating: 4.3,
+      note: "主打鮮蚵、虱目魚的海鮮小吃，蚵仔麵線評價不錯，海鮮品項價格較接近或略超預算。",
+      hours: "每日 11:00–20:30",
+      mapsUrl: "https://www.google.com/maps/place/?q=place_id:ChIJxb6lFgCtQjQR7vmpcoxUjX4"
+    },
+    {
+      name: "東引小吃店 內湖店", category: "小吃",
+      tags: ["滷肉飯","營業到深夜"],
+      priceMin: 80, priceMax: 150, walk: 10, rating: 4.5,
+      note: "營業到深夜的小吃店，滷肉飯、乾麵是熟客口袋名單，適合想吃道地台味的日子。",
+      hours: "每日 10:00–凌晨2:00左右",
+      mapsUrl: "https://www.google.com/maps/place/?q=place_id:ChIJ6V3DAwCtQjQRazE7EnXPX4k"
+    },
+    {
+      name: "Caffaina Coffee 內湖店", category: "咖啡輕食",
+      tags: ["三明治","鹹派"],
+      priceMin: 150, priceMax: 260, walk: 1, rating: 4.1,
+      note: "文青風咖啡館，三明治、鹹派、燉飯都有，餐點選擇多但偏咖啡廳定價，建議鎖定輕食單品。",
+      hours: "每日 08:00–20:00",
+      mapsUrl: "https://www.google.com/maps/place/?q=place_id:ChIJN-86KZStQjQR2WUpchtrM6Q"
+    },
+    {
+      name: "Peter Better Cafe", category: "咖啡輕食",
+      tags: ["三明治","貝果"],
+      priceMin: 120, priceMax: 200, walk: 4, rating: 3.7,
+      note: "巷弄小咖啡館，三明治、貝果選擇不少，適合想簡單吃、順便喝咖啡的日子。",
+      hours: "週一至週五 07:30–17:00，六日 08:00–17:00",
+      mapsUrl: "https://www.google.com/maps/place/?q=place_id:ChIJI-NQIrytQjQRi2_4Ix2v7kA"
+    },
+    {
+      name: "Takeout burger & cafe 內湖店", category: "異國輕食",
+      tags: ["手作漢堡","犒賞日"],
+      priceMin: 180, priceMax: 260, walk: 4, rating: 4.7,
+      note: "手作漢堡專賣，肉多汁厚實、店貓療癒，價位通常會超出160元預算，適合當作犒賞自己的選項。",
+      hours: "每日 11:00–16:00、17:00–22:00",
+      mapsUrl: "https://www.google.com/maps/place/?q=place_id:ChIJH0HPEeOtQjQR1GUkjTCP_dk"
+    }
+  ];
+
+  const STORAGE_KEY = "lunch-oracle-filters-v1";
+  const CUSTOM_KEY = "lunch-oracle-custom-v1";
+  let customSpots = [];
+
+  function loadCustomSpots(){
+    try{
+      const raw = localStorage.getItem(CUSTOM_KEY);
+      if(raw){
+        const parsed = JSON.parse(raw);
+        if(Array.isArray(parsed)) customSpots = parsed;
+      }
+    }catch(e){ customSpots = []; }
+  }
+
+  function saveCustomSpots(){
+    try{ localStorage.setItem(CUSTOM_KEY, JSON.stringify(customSpots)); }
+    catch(e){ /* ignore */ }
+  }
+
+  function getAllSpots(){ return SPOTS.concat(customSpots); }
+  function getAllCategories(){ return [...new Set(getAllSpots().map(s => s.category))]; }
+
+  loadCustomSpots();
+
+  const state = {
+    categories: new Set(getAllCategories()),
+    maxWalk: 10,
+    budget: "fit"
+  };
+
+  function loadState(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return;
+      const saved = JSON.parse(raw);
+      if(Array.isArray(saved.categories)) state.categories = new Set(saved.categories);
+      if(typeof saved.maxWalk === "number") state.maxWalk = saved.maxWalk;
+      if(typeof saved.budget === "string") state.budget = saved.budget;
+    }catch(e){ /* ignore */ }
+  }
+
+  function saveState(){
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        categories: [...state.categories],
+        maxWalk: state.maxWalk,
+        budget: state.budget
+      }));
+    }catch(e){ /* ignore */ }
+  }
+
+  function budgetFit(spot){
+    if(spot.priceMax <= 160) return "fit";
+    if(spot.priceMin <= 160) return "borderline";
+    return "over";
+  }
+
+  function passesFilter(spot){
+    if(!state.categories.has(spot.category)) return false;
+    if(spot.walk > state.maxWalk) return false;
+    const fit = budgetFit(spot);
+    if(state.budget === "fit" && fit !== "fit") return false;
+    if(state.budget === "loose" && fit === "over") return false;
+    return true;
+  }
+
+  function getFiltered(){
+    return getAllSpots().filter(passesFilter).sort((a,b) => a.walk - b.walk);
+  }
+
+  // ---------- render chips ----------
+  const chipWrap = document.getElementById("categoryChips");
+
+  function renderChips(){
+    chipWrap.innerHTML = "";
+    getAllCategories().forEach(cat => {
+      const chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "chip" + (state.categories.has(cat) ? " active" : "");
+      chip.textContent = cat;
+      chip.dataset.cat = cat;
+      chip.addEventListener("click", () => {
+        if(state.categories.has(cat)){
+          if(state.categories.size === 1) return; // keep at least one
+          state.categories.delete(cat);
+        } else {
+          state.categories.add(cat);
+        }
+        chip.classList.toggle("active");
+        refresh();
+      });
+      chipWrap.appendChild(chip);
+    });
+  }
+
+  function syncChips(){
+    [...chipWrap.children].forEach(chip => {
+      chip.classList.toggle("active", state.categories.has(chip.dataset.cat));
+    });
+  }
+
+  const walkRange = document.getElementById("walkRange");
+  const walkValNum = document.getElementById("walkValNum");
+  const walkValLabel = document.getElementById("walkValLabel");
+  walkRange.addEventListener("input", () => {
+    state.maxWalk = Number(walkRange.value);
+    walkValNum.textContent = state.maxWalk + " 分";
+    walkValLabel.textContent = state.maxWalk;
+    refresh();
+  });
+
+  const budgetSelect = document.getElementById("budgetSelect");
+  budgetSelect.addEventListener("change", () => {
+    state.budget = budgetSelect.value;
+    refresh();
+  });
+
+  document.getElementById("resetBtn").addEventListener("click", () => {
+    state.categories = new Set(getAllCategories());
+    state.maxWalk = 10;
+    state.budget = "fit";
+    walkRange.value = 10;
+    walkValNum.textContent = "10 分";
+    walkValLabel.textContent = "10";
+    budgetSelect.value = "fit";
+    syncChips();
+    refresh();
+  });
+
+  // ---------- render cards ----------
+  const cardGrid = document.getElementById("cardGrid");
+  function ratingStr(r){ return (r === null || r === undefined) ? "—" : "★ " + Number(r).toFixed(1); }
+  function priceStr(spot){ return "$" + spot.priceMin + "–" + spot.priceMax; }
+
+  function renderCards(list){
+    cardGrid.innerHTML = "";
+    if(list.length === 0){
+      const div = document.createElement("div");
+      div.className = "no-result";
+      div.textContent = "目前條件下沒有符合的店家，試著放寬步行時間或預算篩選。";
+      cardGrid.appendChild(div);
+      return;
+    }
+    list.forEach(spot => {
+      const fit = budgetFit(spot);
+      const card = document.createElement("article");
+      card.className = "card";
+      card.innerHTML = `
+        <div class="card-top">
+          <div>
+            <div class="card-name">${spot.name}</div>
+            <div class="card-cat">${spot.category}</div>
+          </div>
+          <div class="card-rating">${ratingStr(spot.rating)}</div>
+        </div>
+        <div class="card-badges">
+          <span class="badge">🚶 ${spot.walk} 分鐘</span>
+          <span class="badge ${fit === "over" ? "over" : (fit === "fit" ? "fit" : "")}">${priceStr(spot)}</span>
+          ${spot.custom ? '<span class="badge custom">自訂</span>' : ""}
+          ${spot.tags.map(t => `<span class="badge">${t}</span>`).join("")}
+        </div>
+        <div class="card-note">${spot.note || "尚無備註。"}</div>
+        <div class="card-bottom">
+          <span class="card-hours">${spot.hours || "營業時間未提供"}</span>
+          <span style="display:flex; align-items:center; gap:10px;">
+            ${spot.custom ? `<button class="card-delete" data-id="${spot.id}" type="button">刪除</button>` : ""}
+            <a class="card-map" href="${spot.mapsUrl}" target="_blank" rel="noopener">地圖 →</a>
+          </span>
+        </div>
+      `;
+      cardGrid.appendChild(card);
+    });
+
+    cardGrid.querySelectorAll(".card-delete").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const id = btn.dataset.id;
+        customSpots = customSpots.filter(s => String(s.id) !== id);
+        saveCustomSpots();
+        const stillHasCat = getAllCategories();
+        [...state.categories].forEach(c => { if(!stillHasCat.includes(c)) state.categories.delete(c); });
+        renderChips();
+        refresh();
+      });
+    });
+  }
+
+  const matchCount = document.getElementById("matchCount");
+  const hintCount = document.getElementById("hintCount");
+  const drawBtn = document.getElementById("drawBtn");
+
+  function refresh(){
+    saveState();
+    const list = getFiltered();
+    renderCards(list);
+    matchCount.textContent = list.length;
+    hintCount.textContent = list.length;
+    drawBtn.disabled = list.length === 0;
+  }
+
+  // ---------- draw / fortune slip ----------
+  const slipStage = document.getElementById("slipStage");
+  const canister = document.getElementById("canisterSvg");
+  const stampWords = ["今日之籤","中籤","上上籤","天選午餐","就決定是你了"];
+
+  function buildSlip(spot){
+    const fit = budgetFit(spot);
+    const priceNote = fit === "fit" ? "在預算內" : (fit === "borderline" ? "接近上限" : "通常超出預算");
+    const stamp = stampWords[Math.floor(Math.random()*stampWords.length)];
+    const el = document.createElement("div");
+    el.className = "slip";
+    el.innerHTML = `
+      <div class="slip-stamp">${stamp}</div>
+      <div class="slip-eyebrow">今日籤詩 · 午餐指引</div>
+      <div class="slip-name">${spot.name}</div>
+      <div class="slip-cat">${spot.category} ・ ${spot.tags.join(" ／ ")}</div>
+      <div class="slip-stats">
+        <span class="stat">🚶 ${spot.walk} 分鐘</span>
+        <span class="stat ${fit === "over" ? "warn" : ""}">$${spot.priceMin}–${spot.priceMax}・${priceNote}</span>
+        <span class="stat">★ ${spot.rating.toFixed(1)}</span>
+      </div>
+      <div class="slip-note">${spot.note}</div>
+      <div class="slip-foot">
+        <span class="slip-hours">${spot.hours}</span>
+        <a class="map-link" href="${spot.mapsUrl}" target="_blank" rel="noopener">在 Google 地圖開啟 →</a>
+      </div>
+    `;
+    return el;
+  }
+
+  drawBtn.addEventListener("click", () => {
+    const pool = getFiltered();
+    if(pool.length === 0) return;
+
+    drawBtn.disabled = true;
+    canister.classList.add("shaking");
+    slipStage.innerHTML = "";
+
+    setTimeout(() => {
+      canister.classList.remove("shaking");
+      const pick = pool[Math.floor(Math.random() * pool.length)];
+      const slip = buildSlip(pick);
+      slipStage.appendChild(slip);
+      requestAnimationFrame(() => slip.classList.add("show"));
+      drawBtn.disabled = false;
+      drawBtn.textContent = "再 抽 一 次";
+    }, 620);
+  });
+
+  // ---------- add-spot form ----------
+  const addToggleBtn = document.getElementById("addToggleBtn");
+  const addPanel = document.getElementById("addPanel");
+  const addForm = document.getElementById("addForm");
+  const addError = document.getElementById("addError");
+  const addCancelBtn = document.getElementById("addCancelBtn");
+  const categoryOptions = document.getElementById("categoryOptions");
+
+  function fillCategoryOptions(){
+    categoryOptions.innerHTML = getAllCategories().map(c => `<option value="${c}"></option>`).join("");
+  }
+
+  function openAddPanel(){
+    fillCategoryOptions();
+    addPanel.classList.add("open");
+    addError.classList.remove("show");
+    document.getElementById("f-name").focus();
+  }
+  function closeAddPanel(){
+    addPanel.classList.remove("open");
+    addForm.reset();
+    addError.classList.remove("show");
+  }
+
+  addToggleBtn.addEventListener("click", () => {
+    if(addPanel.classList.contains("open")) closeAddPanel();
+    else openAddPanel();
+  });
+  addCancelBtn.addEventListener("click", closeAddPanel);
+
+  function buildMapsUrl(rawInput, name){
+    const trimmed = (rawInput || "").trim();
+    if(/^https?:\/\//i.test(trimmed)) return trimmed;
+    const query = trimmed || (name + " 台北市內湖區");
+    return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(query);
+  }
+
+  addForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const name = document.getElementById("f-name").value.trim();
+    const category = document.getElementById("f-category").value.trim();
+    const walk = Number(document.getElementById("f-walk").value);
+    const priceMin = Number(document.getElementById("f-priceMin").value);
+    const priceMax = Number(document.getElementById("f-priceMax").value);
+    const ratingRaw = document.getElementById("f-rating").value.trim();
+    const tagsRaw = document.getElementById("f-tags").value.trim();
+    const hours = document.getElementById("f-hours").value.trim();
+    const note = document.getElementById("f-note").value.trim();
+    const mapRaw = document.getElementById("f-map").value.trim();
+
+    if(!name || !category || !walk || priceMin === "" || priceMax === "" || isNaN(walk) || isNaN(priceMin) || isNaN(priceMax)){
+      addError.textContent = "請至少填寫店名、類型、走路時間與價格範圍。";
+      addError.classList.add("show");
+      return;
+    }
+    if(priceMin > priceMax){
+      addError.textContent = "價格下限不能大於價格上限。";
+      addError.classList.add("show");
+      return;
+    }
+
+    const spot = {
+      id: "c" + Date.now() + Math.floor(Math.random()*1000),
+      custom: true,
+      name, category,
+      tags: tagsRaw ? tagsRaw.split(",").map(t => t.trim()).filter(Boolean) : [],
+      priceMin, priceMax, walk,
+      rating: ratingRaw ? Number(ratingRaw) : null,
+      note,
+      hours: hours || "營業時間未提供，請至現場或地圖確認",
+      mapsUrl: buildMapsUrl(mapRaw, name)
+    };
+
+    customSpots.push(spot);
+    saveCustomSpots();
+    state.categories.add(category);
+    renderChips();
+    closeAddPanel();
+    refresh();
+  });
+
+  // ---------- init ----------
+  loadState();
+  renderChips();
+  walkRange.value = state.maxWalk;
+  walkValNum.textContent = state.maxWalk + " 分";
+  walkValLabel.textContent = state.maxWalk;
+  budgetSelect.value = state.budget;
+  refresh();
+})();
+</script>
+</body>
+</html>
