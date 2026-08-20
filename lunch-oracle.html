@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>內科午餐靈籤 - 洲子街午餐求籤所</title>
+  <style>
+    :root {
+      --bg-color: #f7f1e3;
+      --temple-red: #b71c1c;
+      --temple-gold: #ffb300;
+      --wood-dark: #4e342e;
+      --wood-light: #d7ccc8;
+      --card-bg: #fffdf9;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "PingFang TC", "Microsoft JhengHei", sans-serif;
+      background-color: var(--bg-color);
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px 15px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    h1 {
+      color: var(--temple-red);
+      font-size: 1.8rem;
+      letter-spacing: 2px;
+      margin-bottom: 5px;
+    }
+    p.subtitle {
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    /* 籤筒區域 */
+    .oracle-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 25px;
+      position: relative;
+    }
+
+    .bucket {
+      width: 120px;
+      height: 180px;
+      background: linear-gradient(135deg, #8d6e63, var(--wood-dark));
+      border: 4px solid var(--temple-gold);
+      border-radius: 10px 10px 30px 30px;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding-top: 15px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+      cursor: pointer;
+    }
+
+    /* 籤枝 */
+    .sticks {
+      display: flex;
+      gap: 6px;
+      position: absolute;
+      top: -30px;
+    }
+    .stick {
+      width: 10px;
+      height: 90px;
+      background-color: var(--wood-light);
+      border-radius: 5px 5px 0 0;
+      border: 1px solid #a1887f;
+      border-top: 12px solid var(--temple-red);
+    }
+
+    /* 搖晃動畫 */
+    .shake {
+      animation: shakeBucket 0.5s ease-in-out infinite;
+    }
+    @keyframes shakeBucket {
+      0% { transform: rotate(0deg); }
+      25% { transform: rotate(-8deg); }
+      50% { transform: rotate(8deg); }
+      75% { transform: rotate(-5deg); }
+      100% { transform: rotate(0deg); }
+    }
+
+    .btn-draw {
+      margin-top: 25px;
+      background: linear-gradient(180deg, #d32f2f, var(--temple-red));
+      color: var(--temple-gold);
+      border: 2px solid var(--temple-gold);
+      padding: 12px 30px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border-radius: 25px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      transition: transform 0.1s, background 0.2s;
+    }
+    .btn-draw:active { transform: scale(0.95); }
+
+    /* 籤詩結果面板 */
+    .result-card {
+      width: 100%;
+      max-width: 400px;
+      background-color: var(--card-bg);
+      border: 3px double var(--temple-red);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+      display: none;
+      margin-bottom: 25px;
+      position: relative;
+    }
+
+    .result-card.active { display: block; animation: fadeIn 0.4s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .fortune-tag {
+      display: inline-block;
+      background-color: var(--temple-red);
+      color: var(--temple-gold);
+      font-weight: bold;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+    }
+    .shop-name {
+      font-size: 1.5rem;
+      color: var(--wood-dark);
+      font-weight: bold;
+      margin: 8px 0;
+    }
+    .shop-info {
+      font-size: 0.95rem;
+      color: #555;
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+    .poem {
+      font-style: italic;
+      color: #7f8c8d;
+      font-size: 0.9rem;
+      border-top: 1px dashed #ccc;
+      padding-top: 10px;
+      margin-top: 10px;
+    }
+
+    .map-btn {
+      display: inline-block;
+      margin-top: 12px;
+      color: #1976d2;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+
+    /* 工具區塊 */
+    .tools-section {
+      width: 100%;
+      max-width: 400px;
+      background: #fff;
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      margin-bottom: 30px;
+    }
+    .tools-title {
+      font-size: 1rem;
+      font-weight: bold;
+      color: var(--wood-dark);
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .action-btn-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .btn-secondary {
+      background-color: #f8f9fa;
+      border: 1px solid #ccc;
+      padding: 8px 0;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      color: #333;
+      font-weight: 500;
+    }
+    .btn-secondary:hover { background-color: #e9ecef; }
+
+    /* 表單與編輯區 */
+    .panel-block {
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 10px;
+      padding-top: 12px;
+      border-top: 1px solid #eee;
+    }
+    .panel-block.active { display: flex; }
+
+    .add-form input {
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 0.9rem;
+    }
+    .btn-submit {
+      background-color: var(--temple-red);
+      color: #fff;
+      border: none;
+      padding: 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    /* 店家編輯列表 */
+    .shop-list {
+      max-height: 250px;
+      overflow-y: auto;
+      border: 1px solid #eee;
+      border-radius: 6px;
+      padding: 5px;
+    }
+    .shop-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 10px;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 0.85rem;
+    }
+    .shop-item:last-child { border-bottom: none; }
+    .shop-item-info {
+      display: flex;
+      flex-direction: column;
+    }
+    .shop-item-name {
+      font-weight: bold;
+      color: #333;
+    }
+    .shop-item-sub {
+      color: #777;
+      font-size: 0.75rem;
+    }
+    .btn-del {
+      background: #ffebee;
+      color: #c62828;
+      border: 1px solid #ffcdd2;
+      padding: 2px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.75rem;
+    }
+    .btn-del:hover { background: #ffcdd2; }
+
+    .btn-reset {
+      margin-top: 8px;
+      background: none;
+      border: none;
+      color: #888;
+      font-size: 0.75rem;
+      text-decoration: underline;
+      cursor: pointer;
+      text-align: right;
+    }
+
+    .shop-count {
+      font-size: 0.8rem;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>⛩️ 洲子街午餐求籤所</h1>
+    <p class="subtitle">目標：洲子街 105 號附近 ｜ 步行 10 分鐘內</p>
+  </header>
+
+  <main class="oracle-container">
+    <div class="bucket" id="bucket" onclick="drawFortune()">
+      <div class="sticks">
+        <div class="stick" style="transform: translateY(-5px) rotate(-3deg);"></div>
+        <div class="stick" style="transform: translateY(-12px);"></div>
+        <div class="stick" style="transform: translateY(-2px) rotate(4deg);"></div>
+        <div class="stick" style="transform: translateY(-8px) rotate(-2deg);"></div>
+      </div>
+    </div>
+    <button class="btn-draw" onclick="drawFortune()">誠心求籤</button>
+  </main>
+
+  <!-- 籤詩顯示區域 -->
+  <section class="result-card" id="resultCard">
+    <div class="fortune-tag" id="fortuneSign">上吉籤</div>
+    <div class="shop-name" id="shopName">店家名稱</div>
+    <div class="shop-info" id="shopInfo">類別・步行約 X 分鐘</div>
+    <div class="poem" id="fortunePoem">「籤文說明...」</div>
+    <a href="#" target="_blank" class="map-btn" id="mapLink">📍 開啟 Google 地圖導航</a>
+  </section>
+
+  <!-- 工具區：搜尋、新增與編輯 -->
+  <section class="tools-section">
+    <div class="tools-title">
+      <span>籤筒名冊管理</span>
+      <span class="shop-count" id="shopCount">共 0 間</span>
+    </div>
+    <div class="action-btn-group">
+      <button class="btn-secondary" onclick="openSearchGoogle()">🔍 搜尋周邊美食</button>
+      <button class="btn-secondary" onclick="togglePanel('addForm')">➕ 新增店家</button>
+      <button class="btn-secondary" onclick="togglePanel('manageList')" style="grid-column: span 2;">📝 編輯/管理完整清單</button>
+    </div>
+
+    <!-- 1. 新增店家表單 -->
+    <form class="panel-block add-form" id="addForm" onsubmit="handleAddShop(event)">
+      <input type="text" id="inputName" placeholder="店家名稱（必填）" required>
+      <input type="text" id="inputCategory" placeholder="種類（如：小吃、韓式、健康餐）" required>
+      <input type="url" id="inputMapUrl" placeholder="Google 地圖連結（選填）">
+      <input type="number" id="inputTime" placeholder="步行時間（分鐘，預設 5）" max="10">
+      <button type="submit" class="btn-submit">加入籤筒</button>
+    </form>
+
+    <!-- 2. 店家管理/編輯列表 -->
+    <div class="panel-block" id="manageList">
+      <div class="shop-list" id="shopListContainer">
+        <!-- 動態渲染店家列表 -->
+      </div>
+      <button class="btn-reset" onclick="resetToDefault()">🔄 重置為預設店家名冊</button>
+    </div>
+  </section>
+
+  <script>
+    // 指定 18 間預設美食清單
+    const defaultShops = [
+      { name: "爭饗吃台南虱目魚小卷米粉", category: "台式小吃/米粉湯", mapUrl: "https://maps.app.goo.gl/ft9KDsbxKiWMapfy7", walkMin: 5, poem: "湯頭鮮甜小卷Q，吃完全身暖洋洋。" },
+      { name: "ProteinLAB 高蛋白健康餐", category: "健康餐/健身便當", mapUrl: "https://maps.app.goo.gl/aDUEKmRk6ByM53i16", walkMin: 4, poem: "補足優質蛋白質，下午精神抖擻戰力滿點。" },
+      { name: "韓國料理裴老師家常飯", category: "韓式料理/家常飯", mapUrl: "https://maps.app.goo.gl/Kcq46w5Sff1E56ZK6", walkMin: 6, poem: "道地韓式風味，酸辣開胃大口滿足。" },
+      { name: "辣不怕創意現切滷味(內湖店)", category: "加熱滷味/小吃", mapUrl: "https://maps.app.goo.gl/uWmZzJ82CV8wBPF99", walkMin: 5, poem: "香辣入味隨心搭配，食欲大開暢快無比。" },
+      { name: "老大爺煎餅果子", category: "特色小吃/煎餅果子", mapUrl: "https://maps.app.goo.gl/G9L4HAT4sWwjaTE47", walkMin: 4, poem: "外酥內軟層次豐富，美味方便快速享用。" },
+      { name: "大直粥品 內湖店", category: "暖胃粥品/麵食", mapUrl: "https://maps.app.goo.gl/wDvMHPfmLi7q8yyL7", walkMin: 5, poem: "熱粥護胃舒緩身心，順心如意好運來。" },
+      { name: "成都抄手", category: "川味麵食/抄手", mapUrl: "https://maps.app.goo.gl/nvxCRW3Fzn9fHr5R8", walkMin: 6, poem: "麻辣鮮香抄手滑順，吃完煩惱全掃空。" },
+      { name: "亞記牛肉河粉", category: "越式料理/河粉", mapUrl: "https://maps.app.goo.gl/DCmS6vfwcuvcqn8E8", walkMin: 5, poem: "湯頭濃郁清爽不油膩，擠點檸檬更提味。" },
+      { name: "兄弟麵館內湖店", category: "特色麵食/乾麵", mapUrl: "https://maps.app.goo.gl/yybCYNVdTBce2ibR8", walkMin: 7, poem: "麵條紮實份量足，大口吃麵最過癮。" },
+      { name: "泰回味原泰料理", category: "泰式料理/簡餐", mapUrl: "https://maps.app.goo.gl/y3WKFq42EzHuNxFN8", walkMin: 6, poem: "泰式酸辣超下飯，為午後注入熱帶活力。" },
+      { name: "Miss Energy 能量小姐 台北內科", category: "水煮低卡/健康餐", mapUrl: "https://maps.app.goo.gl/nS2rcsF9axTQR7Tc7", walkMin: 4, poem: "清爽無負擔，飲食控制的最佳良伴。" },
+      { name: "GET POWER 給力盒子 內科店", category: "健康餐/高蛋白便當", mapUrl: "https://maps.app.goo.gl/WdTdqJuWsH5Xi533A", walkMin: 4, poem: "給力餐盒補滿電，下午工作效率翻倍。" },
+      { name: "濠記水餃", category: "手工水餃/湯品", mapUrl: "https://maps.app.goo.gl/WVZsDhZjSQhxGBtD8", walkMin: 5, poem: "皮薄餡飽滿，顆顆實料咬下多汁。" },
+      { name: "西湖涼麵", category: "涼麵/味噌湯", mapUrl: "https://maps.app.goo.gl/6rADKopU5EmpRWZ39", walkMin: 6, poem: "麻醬濃郁涼麵爽口，配碗三合一湯最對味。" },
+      { name: "麥當勞-台北西湖餐廳", category: "美式速食/漢堡", mapUrl: "https://maps.app.goo.gl/2H7rW5STnEEWdrhd7", walkMin: 7, poem: "歡樂薯條配漢堡，快速美味心情好。" },
+      { name: "明家精緻麵館", category: "精緻麵食/牛肉麵", mapUrl: "https://maps.app.goo.gl/pGPVfY2DZEpeM4ff7", walkMin: 5, poem: "湯頭講究麵Q彈，用心煮出一碗好麵。" },
+      { name: "瑞哥雞肉飯內科店", category: "雞肉飯/台式便當", mapUrl: "https://maps.app.goo.gl/PxtJKzTLSMLVqchN7", walkMin: 3, poem: "鮮嫩雞肉淋上醬汁，香氣四溢停不下來。" },
+      { name: "SUBWAY (洲子美食館店)", category: "潛艇堡/輕食", mapUrl: "https://maps.app.goo.gl/Xgmkpr7G4pQHRrV78", walkMin: 2, poem: "新鮮蔬菜自選組合，洲子美食館近在咫尺。" }
+    ];
+
+    const poems = [
+      "此籤乃大吉之兆，今日午餐必定滿足！",
+      "宜專心享用美食，暫時放下手邊公事。",
+      "順應天時，吃飽喝足方能化解午後阻礙。",
+      "選擇困難終有解，安心享用眼前美味。",
+      "美味當前，今日午餐格外順口！"
+    ];
+
+    const signs = ["大吉", "上吉", "中吉", "聖籤"];
+
+    // 取得店家列表
+    function getShops() {
+      const stored = localStorage.getItem("lunch_shops_v4");
+      if (stored) {
+        return JSON.parse(stored);
+      }
+      localStorage.setItem("lunch_shops_v4", JSON.stringify(defaultShops));
+      return defaultShops;
+    }
+
+    // 儲存店家列表
+    function saveShops(list) {
+      localStorage.setItem("lunch_shops_v4", JSON.stringify(list));
+      updateUI();
+    }
+
+    // 更新介面數字與列表
+    function updateUI() {
+      const list = getShops();
+      document.getElementById("shopCount").innerText = `共 ${list.length} 間`;
+      renderShopList(list);
+    }
+
+    // 渲染管理清單 HTML
+    function renderShopList(list) {
+      const container = document.getElementById("shopListContainer");
+      if (list.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding:15px; color:#999;">籤筒空空如也，請先新增店家或重置預設值！</div>`;
+        return;
+      }
+
+      container.innerHTML = list.map((shop, index) => {
+        return `
+          <div class="shop-item">
+            <div class="shop-item-info">
+              <span class="shop-item-name">${shop.name}</span>
+              <span class="shop-item-sub">${shop.category} 🚶${shop.walkMin || 5}分鐘</span>
+            </div>
+            <button class="btn-del" onclick="deleteShop(${index})">刪除</button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 抽籤邏輯
+    function drawFortune() {
+      const list = getShops();
+      if (list.length === 0) {
+        alert("籤筒目前沒有店家，請點選「新增店家」或「編輯完整清單」加入店家！");
+        return;
+      }
+
+      const bucket = document.getElementById("bucket");
+      const card = document.getElementById("resultCard");
+      
+      card.classList.remove("active");
+      bucket.classList.add("shake");
+
+      setTimeout(() => {
+        bucket.classList.remove("shake");
+        
+        const randomShop = list[Math.floor(Math.random() * list.length)];
+        const randomSign = signs[Math.floor(Math.random() * signs.length)];
+        const randomPoem = randomShop.poem || poems[Math.floor(Math.random() * poems.length)];
+
+        document.getElementById("fortuneSign").innerText = `籤詩：${randomSign}`;
+        document.getElementById("shopName").innerText = randomShop.name;
+        document.getElementById("shopInfo").innerText = `【${randomShop.category}】 🚶 步行約 ${randomShop.walkMin || 5} 分鐘`;
+        document.getElementById("fortunePoem").innerText = `「${randomPoem}」`;
+        
+        // 優先使用店家設定的 Google 地圖網址，若無則以名稱搜尋
+        const mapSearchUrl = randomShop.mapUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(randomShop.name + " 台北市內湖區洲子街")}`;
+        document.getElementById("mapLink").href = mapSearchUrl;
+
+        card.classList.add("active");
+      }, 600);
+    }
+
+    // 新增店家
+    function handleAddShop(e) {
+      e.preventDefault();
+      const name = document.getElementById("inputName").value.trim();
+      const category = document.getElementById("inputCategory").value.trim();
+      const mapUrl = document.getElementById("inputMapUrl").value.trim() || null;
+      const walkMin = parseInt(document.getElementById("inputTime").value) || 5;
+
+      if (!name) return;
+
+      const currentList = getShops();
+      currentList.push({ name, category, mapUrl, walkMin });
+      saveShops(currentList);
+
+      alert(`成功將「${name}」加入午餐籤筒！`);
+      document.getElementById("addForm").reset();
+      togglePanel('addForm');
+    }
+
+    // 刪除指定店家
+    function deleteShop(index) {
+      const currentList = getShops();
+      currentList.splice(index, 1);
+      saveShops(currentList);
+    }
+
+    // 重置為預設值
+    function resetToDefault() {
+      if (confirm("確定要將店家清單恢復為這 18 間預設名單嗎？這會清除你手動新增的其他店家。")) {
+        localStorage.removeItem("lunch_shops_v4");
+        updateUI();
+      }
+    }
+
+    // 切換面板
+    function togglePanel(panelId) {
+      const target = document.getElementById(panelId);
+      const isOpen = target.classList.contains("active");
+
+      document.querySelectorAll(".panel-block").forEach(el => el.classList.remove("active"));
+
+      if (!isOpen) {
+        target.classList.add("active");
+      }
+    }
+
+    function openSearchGoogle() {
+      const url = `https://www.google.com/maps/search/餐廳/@25.079218,121.570712,17z`;
+      window.open(url, "_blank");
+    }
+
+    // 初始化頁面
+    updateUI();
+  </script>
+</body>
+</html>
