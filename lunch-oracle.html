@@ -28,7 +28,7 @@
 
     header {
       text-align: center;
-      margin-bottom: 35px; /* 增加下方間距，避免籤枝重疊 */
+      margin-bottom: 35px;
     }
     h1 {
       color: var(--temple-red);
@@ -48,7 +48,7 @@
       align-items: center;
       margin-bottom: 25px;
       position: relative;
-      margin-top: 25px; /* 上方預留籤枝跳出空間 */
+      margin-top: 25px;
     }
 
     .bucket {
@@ -362,7 +362,6 @@
         <div class="stick" style="transform: translateY(-2px) rotate(4deg);"></div>
         <div class="stick" style="transform: translateY(-8px) rotate(-2deg);"></div>
       </div>
-      <!-- 抽出時跳出的單隻靈籤 -->
       <div class="lucky-stick" id="luckyStick"></div>
     </div>
     <button class="btn-draw" id="drawBtn" onclick="drawFortune()">誠心求籤</button>
@@ -408,7 +407,7 @@
   </section>
 
   <script>
-    // 指定 19 間預設美食清單
+    // 預設 19 間美食清單
     const defaultShops = [
       { name: "爭饗吃台南虱目魚小卷米粉", category: "台式小吃/米粉湯", mapUrl: "https://maps.app.goo.gl/ft9KDsbxKiWMapfy7", walkMin: 5, poem: "湯頭鮮甜小卷Q，吃完全身暖洋洋。" },
       { name: "ProteinLAB 高蛋白健康餐", category: "健康餐/健身便當", mapUrl: "https://maps.app.goo.gl/aDUEKmRk6ByM53i16", walkMin: 4, poem: "補足優質蛋白質，下午精神抖擻戰力滿點。" },
@@ -427,12 +426,12 @@
       { name: "麥當勞-台北西湖餐廳", category: "美式速食/漢堡", mapUrl: "https://maps.app.goo.gl/2H7rW5STnEEWdrhd7", walkMin: 7, poem: "歡樂薯條配漢堡，快速美味心情好。" },
       { name: "明家精緻麵館", category: "精緻麵食/牛肉麵", mapUrl: "https://maps.app.goo.gl/pGPVfY2DZEpeM4ff7", walkMin: 5, poem: "湯頭講究麵Q彈，用心煮出一碗好麵。" },
       { name: "瑞哥雞肉飯內科店", category: "雞肉飯/台式便當", mapUrl: "https://maps.app.goo.gl/PxtJKzTLSMLVqchN7", walkMin: 3, poem: "鮮嫩雞肉淋上醬汁，香氣四溢停不下來。" },
-      { name: "SUBWAY (洲子美食館店)", category: "潛艇堡/輕食", mapUrl: "https://maps.app.goo.gl/Xgmkpr7G4pQHRrV78", walkMin: 2, poem: "新鮮蔬菜自選組合，洲子美食館近在咫尺。" }
-      { name: "喜魚 小酸菜魚", category: "特色麵食/酸菜魚", mapUrl: "https://maps.app.goo.gl/MyffZ52QcUD1VZjbA", walkMin: 6, poem: "飲料/白飯吃到飽，有麻有辣最過癮。" }      
+      { name: "SUBWAY (洲子美食館店)", category: "潛艇堡/輕食", mapUrl: "https://maps.app.goo.gl/Xgmkpr7G4pQHRrV78", walkMin: 2, poem: "新鮮蔬菜自選組合，洲子美食館近在咫尺。" },
+      { name: "喜魚 小酸菜魚", category: "川味料理/酸菜魚", mapUrl: "https://maps.app.goo.gl/MyffZ52QcUD1VZjbA", walkMin: 5, poem: "酸辣鮮香超爽口，魚肉嫩滑下飯首選。" }
     ];
 
     const poems = [
-      "此籤乃大吉之兆，今日午餐必定滿足！",
+      "此籤乃大吉之兆，今日午餐 salaried 人必定滿足！",
       "宜專心享用美食，暫時放下手邊公事。",
       "順應天時，吃飽喝足方能化解午後阻礙。",
       "選擇困難終有解，安心享用眼前美味。",
@@ -442,34 +441,31 @@
     const signs = ["大吉", "上吉", "中吉", "聖籤"];
     let isDrawing = false;
 
-    // 取得店家列表
+    // 儲存鍵值更新為 v6，確保會載入最新 19 間預設清單
     function getShops() {
-      const stored = localStorage.getItem("lunch_shops_v5");
+      const stored = localStorage.getItem("lunch_shops_v6");
       if (stored) {
         return JSON.parse(stored);
       }
-      localStorage.setItem("lunch_shops_v5", JSON.stringify(defaultShops));
+      localStorage.setItem("lunch_shops_v6", JSON.stringify(defaultShops));
       return defaultShops;
     }
 
-    // 儲存店家列表
     function saveShops(list) {
-      localStorage.setItem("lunch_shops_v5", JSON.stringify(list));
+      localStorage.setItem("lunch_shops_v6", JSON.stringify(list));
       updateUI();
     }
 
-    // 更新介面數字與列表
     function updateUI() {
       const list = getShops();
       document.getElementById("shopCount").innerText = `共 ${list.length} 間`;
       renderShopList(list);
     }
 
-    // 渲染管理清單 HTML
     function renderShopList(list) {
       const container = document.getElementById("shopListContainer");
       if (list.length === 0) {
-        container.innerHTML = `<div style="text-align:center; padding:15px; color:#999;">籤筒空空如也，請先新增店家或重置預設值！</div>`;
+        container.innerHTML = `<div style="text-align:center; padding:15px; color:#999;">籤筒空空如也，請點選重置預設值！</div>`;
         return;
       }
 
@@ -486,13 +482,12 @@
       }).join('');
     }
 
-    // 抽籤邏輯與完整動畫
     function drawFortune() {
       if (isDrawing) return;
 
       const list = getShops();
       if (list.length === 0) {
-        alert("籤筒目前沒有店家，請點選「新增店家」或「編輯完整清單」加入店家！");
+        alert("籤筒目前沒有店家，請點選「重置為預設店家名冊」或「新增店家」！");
         return;
       }
 
@@ -502,22 +497,18 @@
       const luckyStick = document.getElementById("luckyStick");
       const drawBtn = document.getElementById("drawBtn");
 
-      // 1. 重置狀態
       card.classList.remove("active");
       luckyStick.classList.remove("stick-pop-out");
       luckyStick.style.opacity = "0";
       drawBtn.innerText = "求籤中...";
       drawBtn.disabled = true;
 
-      // 2. 開始搖晃籤筒
       bucket.classList.add("shake");
 
-      // 3. 搖晃 1 秒後，籤隻向上跳出
       setTimeout(() => {
         bucket.classList.remove("shake");
         luckyStick.classList.add("stick-pop-out");
 
-        // 4. 籤跳出 0.6 秒後，顯示結果卡片
         setTimeout(() => {
           const randomShop = list[Math.floor(Math.random() * list.length)];
           const randomSign = signs[Math.floor(Math.random() * signs.length)];
@@ -540,7 +531,6 @@
       }, 1000);
     }
 
-    // 新增店家
     function handleAddShop(e) {
       e.preventDefault();
       const name = document.getElementById("inputName").value.trim();
@@ -559,22 +549,19 @@
       togglePanel('addForm');
     }
 
-    // 刪除指定店家
     function deleteShop(index) {
       const currentList = getShops();
       currentList.splice(index, 1);
       saveShops(currentList);
     }
 
-    // 重置為預設值
     function resetToDefault() {
-      if (confirm("確定要將店家清單恢復為這 18 間預設名單嗎？這會清除你手動新增的其他店家。")) {
-        localStorage.removeItem("lunch_shops_v5");
+      if (confirm("確定要將店家清單恢復為 19 間預設名單嗎？")) {
+        localStorage.removeItem("lunch_shops_v6");
         updateUI();
       }
     }
 
-    // 切換面板
     function togglePanel(panelId) {
       const target = document.getElementById(panelId);
       const isOpen = target.classList.contains("active");
@@ -591,7 +578,6 @@
       window.open(url, "_blank");
     }
 
-    // 初始化頁面
     updateUI();
   </script>
 </body>
