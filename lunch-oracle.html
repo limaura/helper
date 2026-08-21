@@ -444,17 +444,17 @@
 
     // 取得店家列表
     function getShops() {
-      const stored = localStorage.getItem("lunch_shops_v4");
+      const stored = localStorage.getItem("lunch_shops_v5");
       if (stored) {
         return JSON.parse(stored);
       }
-      localStorage.setItem("lunch_shops_v4", JSON.stringify(defaultShops));
+      localStorage.setItem("lunch_shops_v5", JSON.stringify(defaultShops));
       return defaultShops;
     }
 
     // 儲存店家列表
     function saveShops(list) {
-      localStorage.setItem("lunch_shops_v4", JSON.stringify(list));
+      localStorage.setItem("lunch_shops_v5", JSON.stringify(list));
       updateUI();
     }
 
@@ -569,7 +569,7 @@
     // 重置為預設值
     function resetToDefault() {
       if (confirm("確定要將店家清單恢復為這 18 間預設名單嗎？這會清除你手動新增的其他店家。")) {
-        localStorage.removeItem("lunch_shops_v4");
+        localStorage.removeItem("lunch_shops_v5");
         updateUI();
       }
     }
